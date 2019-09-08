@@ -40,35 +40,30 @@
     state: "{{ docker_package_state }}"
   notify: restart docker
 
-#FIXME what does this thing?
-## TODO: Remove this shim once 18.09.1 or later is released.
-#- import_tasks: docker-1809-shim.yml
-#  when: ansible_service_mgr == 'systemd'
-
 - name: Ensure systemd directory for docker exists.
   file:
     path: "{{ docker_systemd_directory }}"
     state: directory
-  #FIXME when: 
+  when: proxy_config['http_proxy'] != "" or proxy_config['https_proxy'] != ""
 
 - name: Ensure systemd configuration file for docker proxy settings exists.
   file:
     path: "{{ docker_systemd_directory }}/{{ docker_systemd_file_proxyconf }}"
     state: present
-  #FIXME when: 
+  when: proxy_config['http_proxy'] != "" or proxy_config['https_proxy'] != ""
 
 - name: Ensure systemd configuration file for docker proxy settings is absent, when no proxy is configured..
   file:
     path: "{{ docker_systemd_directory }}/{{ docker_systemd_file_proxyconf }}"
     state: absent
-  #FIXME when: 
+  when: proxy_config['http_proxy'] == "" and proxy_config['https_proxy'] == "" 
 
 - name: Set proxy variables.
   template:
     src: http-proxy.conf.j2
     dest: "{{ docker_systemd_directory }}/{{ docker_systemd_file_proxyconf }}"
   register: proxy_template
-  #FIXME when: 
+  when: proxy_config['http_proxy'] != "" or proxy_config['https_proxy'] != ""
   notify:
     restart docker
 
