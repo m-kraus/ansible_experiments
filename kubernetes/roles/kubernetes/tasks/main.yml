@@ -1,0 +1,120 @@
+---
+#TODO kubelet extra args
+
+- name: Ensure dependencies are installed.
+  package:
+    name: curl
+    state: present
+
+- name: Ensure systcl options are set for kubelet.
+  sysctl:
+   name: "{{ item }}"
+   value: "1"
+   state: present
+   sysctl_set: yes
+   reload: yes
+  with_items:
+    - net.ipv4.ip_forward
+    - net.bridge.bridge-nf-call-iptables
+    - net.bridge.bridge-nf-call-ip6tables
+
+- name: Disable swap otherwise kubelet will not start.
+  command: swapoff -a
+  when: ansible_swaptotal_mb > 0
+
+- name: Remove swapfile from /etc/fstab.
+  mount:
+    name: "{{ item }}"
+    fstype: swap
+    state: absent
+  with_items:
+    - swap
+    - none
+
+- name: Ensure Kubernetes repository exists.
+  yum_repository:
+    name: kubernetes
+    description: Kubernetes
+    enabled: true
+    gpgcheck: true
+    repo_gpgcheck: true
+    baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-{{ kubernetes_yum_arch }}
+    gpgkey:
+      - https://packages.cloud.google.com/yum/doc/yum-key.gpg
+      - https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+
+- name: Add Kubernetes GPG keys.
+  rpm_key:
+    key: "{{ item }}"
+    state: present
+  register: kubernetes_rpm_key
+  with_items:
+    - https://packages.cloud.google.com/yum/doc/yum-key.gpg
+    - https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+
+- name: Make cache if Kubernetes GPG key changed.
+  command: "yum -q makecache -y --disablerepo='*' --enablerepo='kubernetes'"
+  when: kubernetes_rpm_key is changed
+  args:
+    warn: false
+
+- name: Install Kubernetes packages.
+  package:
+    name: "{{ item.name | default(item) }}"
+    state: "{{ item.state | default('present') }}"
+  notify: restart kubelet
+  with_items: "{{ kubernetes_packages }}"
+
+- name: Set facts for KUBELET_EXTRA_ARGS task if environment file exists.
+  set_fact:
+    kubelet_args_path: '{{ kubelet_environment_file_path }}'
+    kubelet_args_line: "{{ 'KUBELET_EXTRA_ARGS=' + kubernetes_kubelet_extra_args }}"
+    kubelet_args_regexp: '^KUBELET_EXTRA_ARGS='
+
+- name: Configure KUBELET_EXTRA_ARGS.
+  lineinfile:
+    path: '{{ kubelet_args_path }}'
+    line: '{{ kubelet_args_line }}'
+    regexp: '{{ kubelet_args_regexp }}'
+    state: present
+  register: kubelet_config_file
+
+- name: Reload systemd unit if args were changed.
+  systemd:
+    state: restarted
+    daemon_reload: true
+    name: kubelet
+  when: kubelet_config_file is changed
+
+- name: Ensure kubelet is started and enabled at boot.
+  service:
+    name: kubelet
+    state: started
+    enabled: true
+
+- name: Check if Kubernetes has already been initialized.
+  stat:
+    path: /etc/kubernetes/admin.conf
+  register: kubernetes_init_stat
+
+# Set up master.
+- include_tasks: master-setup.yml
+  when: kubernetes_role == 'master'
+
+# Set up nodes.
+- name: Get the kubeadm join command from the Kubernetes master.
+  command: kubeadm token create --print-join-command
+  changed_when: false
+  when: kubernetes_role == 'master'
+  register: kubernetes_join_command_result
+
+- name: Set the kubeadm join command globally.
+  set_fact:
+    kubernetes_join_command: "{{ kubernetes_join_command_result.stdout }}"
+  when: kubernetes_join_command_result.stdout is defined
+  delegate_to: "{{ item }}"
+  delegate_facts: true
+  with_items: "{{ groups['all'] }}"
+
+- include_tasks: node-setup.yml
+  when: kubernetes_role == 'node'

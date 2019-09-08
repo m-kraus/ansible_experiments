@@ -1,0 +1,19 @@
+---
+- hosts: ctrl
+  gather_facts: no
+
+  vars:
+    proxy_config:
+      http_proxy: "http://{{ lookup('file','/tmp/my_http_proxy') | default('') }}"
+      https_proxy: "http://{{ lookup('file','/tmp/my_https_proxy') | default('') }}"
+      HTTP_PROXY: "{{ lookup('file','/tmp/my_http_proxy') | default('') }}"
+      HTTPS_PROXY: "{{ lookup('file','/tmp/my_https_proxy') | default('') }}"
+
+  tasks:
+  - name: Copy vagrant insecure key
+    copy:
+      src: /vagrant/vagrant_insecure_private_key
+      dest: ~/.ssh/insecure_private_key
+      mode: '0600'
+
+- import_playbook: main.yml

@@ -1,0 +1,23 @@
+---
+- hosts: k8s_cluster
+  gather_facts: yes
+  become: yes
+
+  environment:
+    http_proxy: proxy_config[http_proxy]
+    https_proxy: proxy_config[https_proxy]
+    HTTP_PROXY: proxy_config[HTTP_PROXY]
+    HTTPS_PROXY: proxy_config[HTTPS_PROXY]
+
+  vars:
+    # Role docker
+    docker_install_compose: false
+    docker_users:
+      - "{{ ansible_user }}"
+    # Role kubernetes
+ 
+  roles:
+    - docker
+    - kubernetes
+
+  tasks: []
