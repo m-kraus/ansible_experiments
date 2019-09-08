@@ -15,6 +15,10 @@
 #TODO how to set safely within role?
 #NO_PROXY: "localhost,127.0.0.1,{{ noproxy_custom }},{{ pod_network_cidr }},10.96.0.0/12"
 
+environment: "{{ proxy_env }}"
+see https://docs.ansible.com/ansible/latest/user_guide/playbooks_environment.html
+set an empty proxy_env: [] as default
+
 #TODO do not set /etc/environment
 # instead use environment: for relevant tasks and only configure for docker
 # - lineinfile for docker systemd unit (present and absent)

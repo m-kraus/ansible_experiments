@@ -4,10 +4,10 @@
 
   vars:
     proxy_config:
-      http_proxy: "http://{{ lookup('file','/tmp/my_http_proxy') | default('') }}"
-      https_proxy: "http://{{ lookup('file','/tmp/my_https_proxy') | default('') }}"
-      HTTP_PROXY: "{{ lookup('file','/tmp/my_http_proxy') | default('') }}"
-      HTTPS_PROXY: "{{ lookup('file','/tmp/my_https_proxy') | default('') }}"
+      http_proxy: "{{ lookup('file','/tmp/my_http_proxy', errors='ignore') | default('') }}"
+      https_proxy: "{{ lookup('file','/tmp/my_https_proxy', errors='ignore') | default('') }}"
+      HTTP_PROXY: "{{ lookup('file','/tmp/my_HTTP_PROXY', errors='ignore')| default('') }}"
+      HTTPS_PROXY: "{{ lookup('file','/tmp/my_HTTPS_PROXY', errors='ignore') | default('') }}"
 
   tasks:
   - name: Copy vagrant insecure key

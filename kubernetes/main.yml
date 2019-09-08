@@ -4,11 +4,11 @@
   become: yes
 
   #FIXME: does not work, get_url cannout use http_proxy=
-  #environment:
-  #  http_proxy: proxy_config[http_proxy]
-  #  https_proxy: proxy_config[https_proxy]
-  #  HTTP_PROXY: proxy_config[HTTP_PROXY]
-  #  HTTPS_PROXY: proxy_config[HTTPS_PROXY]
+  environment:
+    http_proxy: proxy_config['http_proxy']
+    https_proxy: proxy_config['https_proxy']
+    HTTP_PROXY: proxy_config['HTTP_PROXY']
+    HTTPS_PROXY: proxy_config['HTTPS_PROXY']
 
   vars:
     # Role docker

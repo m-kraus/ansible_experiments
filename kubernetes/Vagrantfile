@@ -48,14 +48,16 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       else
         echo "http_proxy IS set, saving..."
         export http_proxy=#{ENV["http_proxy"]}
-        echo ${http_proxy#*://} > /tmp/my_http_proxy
+        echo "http://${http_proxy#*://}" > /tmp/my_http_proxy
+        echo "${http_proxy#*://}" > /tmp/my_HTTP_PROXY
       fi
       if [[ -z "$https_proxy" ]]; then
         echo "https_proxy IS NOT set, doing nothing"
       else
         echo "https_proxy IS set, saving..."
         export https_proxy=#{ENV["https_proxy"]}
-        echo ${https_proxy#*://} > /tmp/my_https_proxy
+        echo "http://${https_proxy#*://}" > /tmp/my_https_proxy
+        echo "${https_proxy#*://}" > /tmp/my_HTTPS_PROXY
       fi
       if [[ -z "$no_proxy" ]]; then
         echo "no_proxy IS NOT set, doing nothing"
