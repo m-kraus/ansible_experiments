@@ -1,29 +1,19 @@
+Vergleichen: https://gridscale.io/community/tutorials/kubernetes-cluster-mit-kubeadm/
+
 - roles:
   - !!! formatting
   - molecule tests
   - meta wiederfeinführen?
 
-- reintorduce better proxy config
-
 - forward 8001 to allow kubectl proxy for https://github.com/kubernetes/dashboard
+
 - maybe write out .kube to /vagrant ?
 
-
-#FIXME no_proxy will never be empty this way
-#TODO maybe leave out? NO_PROXY: "{{ lookup('file','/tmp/my_no_proxy') | default('') }},192.168.33.0/24"
-
-#TODO how to set safely within role?
+#TODO how to set safely within role? Is it necessary? Only docker has an env
 #NO_PROXY: "localhost,127.0.0.1,{{ noproxy_custom }},{{ pod_network_cidr }},10.96.0.0/12"
 
-environment: "{{ proxy_env }}"
-see https://docs.ansible.com/ansible/latest/user_guide/playbooks_environment.html
-set an empty proxy_env: [] as default
-
-#TODO do not set /etc/environment
-# instead use environment: for relevant tasks and only configure for docker
-# - lineinfile for docker systemd unit (present and absent)
-# move to a template file!
-# https://docs.docker.com/config/daemon/systemd/#httphttps-proxy
+#TODO
+get files for kubectl locally?
 
 #TODO necessary for docker?
 # docker settings from https://kubernetes.io/docs/setup/production-environment/container-runtimes/

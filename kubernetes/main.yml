@@ -3,19 +3,21 @@
   gather_facts: yes
   become: yes
 
-  #FIXME: does not work, get_url cannout use http_proxy=
-  environment:
-    http_proxy: proxy_config['http_proxy']
-    https_proxy: proxy_config['https_proxy']
-    HTTP_PROXY: proxy_config['HTTP_PROXY']
-    HTTPS_PROXY: proxy_config['HTTPS_PROXY']
-
   vars:
     # Role docker
     docker_install_compose: false
     docker_users:
       - "{{ ansible_user }}"
     # Role kubernetes
+    # You can set proxy variables if needed here:
+    #proxy_config:
+    #  http_proxy: "http://my_proxy:port"
+    #  https_proxy: "http://my_proxy:port"
+    #  HTTP_PROXY: "my_proxy:port"
+    #  HTTPS_PROXY: "my_proxy:port"
+    #  NO_PROXY: "localhost,127.0.*"
+
+  environment: "{{ proxy_config }}"
  
   roles:
     - docker

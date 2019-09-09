@@ -40,30 +40,31 @@
     state: "{{ docker_package_state }}"
   notify: restart docker
 
+- name: Ensure systemd directory for docker is absent, when no proxy is configured.
+  file:
+    path: "{{ docker_systemd_directory }}"
+    state: absent
+  when: proxy_config | length == 0
+
 - name: Ensure systemd directory for docker exists.
   file:
     path: "{{ docker_systemd_directory }}"
     state: directory
-  when: proxy_config['http_proxy'] != "" or proxy_config['https_proxy'] != ""
+  when: proxy_config | length > 0
 
-- name: Ensure systemd configuration file for docker proxy settings exists.
-  file:
-    path: "{{ docker_systemd_directory }}/{{ docker_systemd_file_proxyconf }}"
-    state: present
-  when: proxy_config['http_proxy'] != "" or proxy_config['https_proxy'] != ""
-
-- name: Ensure systemd configuration file for docker proxy settings is absent, when no proxy is configured..
-  file:
-    path: "{{ docker_systemd_directory }}/{{ docker_systemd_file_proxyconf }}"
-    state: absent
-  when: proxy_config['http_proxy'] == "" and proxy_config['https_proxy'] == "" 
+#FIXME remove when removing the directory is sufficient
+#- name: Ensure systemd configuration file for docker proxy settings is absent, when no proxy is configured..
+#  file:
+#    path: "{{ docker_systemd_directory }}/{{ docker_systemd_file_proxyconf }}"
+#    state: absent
+#  when: proxy_config | length == 0
 
 - name: Set proxy variables.
   template:
     src: http-proxy.conf.j2
     dest: "{{ docker_systemd_directory }}/{{ docker_systemd_file_proxyconf }}"
   register: proxy_template
-  when: proxy_config['http_proxy'] != "" or proxy_config['https_proxy'] != ""
+  when: proxy_config | length > 0
   notify:
     restart docker
 

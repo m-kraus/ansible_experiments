@@ -1,9 +1,5 @@
 ---
-proxy_config:
-  http_proxy: ""
-  https_proxy: ""
-  HTTP_PROXY: ""
-  HTTPS_PROXY: ""
+proxy_config: {}
 
 # Edition can be one of: 'ce' (Community Edition) or 'ee' (Enterprise Edition).
 docker_edition: 'ce'

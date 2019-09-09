@@ -43,28 +43,19 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.network :private_network, ip: "192.168.33.70"
     config.vm.provision "shell", inline: <<-SHELL
       #ATTENTION: ruby on windows cannot distinguish caase sensitive environment variables!
-      if [[ -z "$http_proxy" ]]; then
-        echo "http_proxy IS NOT set, doing nothing"
+      export http_proxy=#{ENV["http_proxy"]}
+      export https_proxy=#{ENV["https_proxy"]}
+      export no_proxy=#{ENV["no_proxy"]}
+      if [[ -z "$http_proxy" && -z "$https_proxy" ]]; then
+        echo "proxy IS NOT set, doing nothing"
+        rm -f /tmp/my_proxy
       else
-        echo "http_proxy IS set, saving..."
-        export http_proxy=#{ENV["http_proxy"]}
-        echo "http://${http_proxy#*://}" > /tmp/my_http_proxy
-        echo "${http_proxy#*://}" > /tmp/my_HTTP_PROXY
-      fi
-      if [[ -z "$https_proxy" ]]; then
-        echo "https_proxy IS NOT set, doing nothing"
-      else
-        echo "https_proxy IS set, saving..."
-        export https_proxy=#{ENV["https_proxy"]}
-        echo "http://${https_proxy#*://}" > /tmp/my_https_proxy
-        echo "${https_proxy#*://}" > /tmp/my_HTTPS_PROXY
-      fi
-      if [[ -z "$no_proxy" ]]; then
-        echo "no_proxy IS NOT set, doing nothing"
-      else
-        echo "no_proxy IS set, saving..."
-        export no_proxy=#{ENV["no_proxy"]}
-        echo ${no_proxy#*://} > /tmp/my_no_proxy
+        echo "proxy IS set, saving..."
+        echo "http_proxy: http://${http_proxy#*://}" > /tmp/my_proxy
+        echo "HTTP_PROXY: ${http_proxy#*://}" >> /tmp/my_proxy
+        echo "https_proxy: http://${https_proxy#*://}" >> /tmp/my_proxy
+        echo "HTTPS_PROXY: ${https_proxy#*://}" >> /tmp/my_proxy
+        echo "NO_PROXY: ${no_proxy#*://}" >> /tmp/my_proxy
       fi
       sudo -E bash -c 'yum -y --setopt=ip_resolve=4 install epel-release'
       sudo -E bash -c 'yum -y --setopt=ip_resolve=4 install python-pip'
