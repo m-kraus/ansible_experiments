@@ -1,47 +1,9 @@
+add environment role
+
 Vergleichen: https://gridscale.io/community/tutorials/kubernetes-cluster-mit-kubeadm/
 
 - roles:
-  - !!! formatting
   - molecule tests
   - meta wiederfeinführen?
 
-- forward 8001 to allow kubectl proxy for https://github.com/kubernetes/dashboard
-
-- maybe write out .kube to /vagrant ?
-
-#TODO how to set safely within role? Is it necessary? Only docker has an env
-#NO_PROXY: "localhost,127.0.0.1,{{ noproxy_custom }},{{ pod_network_cidr }},10.96.0.0/12"
-
-#TODO
-get files for kubectl locally?
-
-#TODO necessary for docker?
-# docker settings from https://kubernetes.io/docs/setup/production-environment/container-runtimes/
-# e.g. daemon.json
-
-#TODO necessary for kubelet?
-#- name: disable SELinux
-#  command: setenforce 0
-#
-#- name: disable SELinux on reboot
-#  selinux:
-#    state: disabled
-
-#TODO verify
-#- name: Configure node ip
-#  lineinfile:
-#    path: /etc/sysconfig/kubelet
-#    line: "KUBELET_EXTRA_ARGS=--node-ip={{ node_ip }}"
-
-#TODO verify
-#- name: Initialize the cluster
-#  shell: "kubeadm init --pod-network-cidr={{ pod_network_cidr }} --apiserver-advertise-address={{ kubernetes_apiserver_advertise_address | default(ansible_default_ipv4.address, true) }} >> cluster_initialized.txt"
-#  args:
-#    chdir: "/home/{{ ansible_user }}"
-#    creates: cluster_initialized.txt
-#  when: initialized.stat.exists == False
-
-#TODO version configurable
-#https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-#https://raw.githubusercontent.com/coreos/flannel/v0.10.0/Documentation/kube-flannel.yml
-#https://docs.projectcalico.org/v3.8/getting-started/kubernetes/installation/hosted/calico.yaml
+- get manifest files for kubectl locally?

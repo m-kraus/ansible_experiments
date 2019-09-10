@@ -9,6 +9,7 @@
     docker_users:
       - "{{ ansible_user }}"
     # Role kubernetes
+    kubernetes_kubelet_extra_args: "--node-ip={{ ansible_host }}"
     # You can set proxy variables if needed here:
     #proxy_config:
     #  http_proxy: "http://my_proxy:port"

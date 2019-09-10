@@ -31,6 +31,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       config.vm.hostname = opts[:name]
       config.vm.network :private_network, ip: opts[:ip]
       config.vm.synced_folder ".", "/vagrant", disabled: true
+      # Forward 8001 to allow "kubectl proxy" on master
+      #if opts[:name] == "node1"
+      #  config.vm.network "forwarded_port", guest: 8001, host: 8001
+      #end
     end
   end
 
