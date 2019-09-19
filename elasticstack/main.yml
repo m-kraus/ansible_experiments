@@ -1,0 +1,30 @@
+---
+- hosts: escluster
+  gather_facts: yes
+  become: yes
+
+  vars:
+    # You can set proxy variables if needed here:
+    #proxy_config:
+    #  http_proxy: "http://my_proxy:port"
+    #  https_proxy: "http://my_proxy:port"
+    #  HTTP_PROXY: "my_proxy:port"
+    #  HTTPS_PROXY: "my_proxy:port"
+    #  NO_PROXY: "localhost,127.0.*"
+
+  environment: "{{ proxy_config }}"
+
+  roles:
+    - role: java
+      java_packages:
+        - java-1.8.0-openjdk
+    - role: elasticsearch
+      elasticsearch_version: '7.x'
+      elasticsearch_package_state: 'latest'
+      elasticsearch_network_host: '0.0.0.0'
+
+  tasks:
+    - name: Example Task
+      debug:
+        msg: "Current node is {{ inventory_hostname }} ({{ ansible_host }}) - {{ ansible_default_ipv4 }}"
+
